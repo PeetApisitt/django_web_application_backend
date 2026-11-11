@@ -4,6 +4,9 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+
+    ordering = ("ranks",)
+    
     fieldsets = UserAdmin.fieldsets + (
         ("ข้อมูลบริษัท", {
             "fields": ( "personal_id", "military_id","ranks", "position"),

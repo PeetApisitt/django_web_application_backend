@@ -27,3 +27,5 @@ class User(AbstractUser):
         blank=True,
         verbose_name="MILITARY_ID",
     )
+    class Meta:
+        ordering = ["ranks"]
