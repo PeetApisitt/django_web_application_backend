@@ -6,15 +6,16 @@ from .models import User
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ("ข้อมูลบริษัท", {
-            "fields": ("employee_code",),
+            "fields": ( "personal_id", "military_id","ranks", "position"),
         }),
     )
 
     add_fieldsets = UserAdmin.add_fieldsets + (
         ("ข้อมูลบริษัท", {
-            "fields": ("employee_code",),
+            "fields": ( "personal_id", "military_id","ranks", "position"),
         }),
     )
 
-    list_display = UserAdmin.list_display + ("employee_code",)
-    search_fields = UserAdmin.search_fields + ("employee_code",)
+    list_display = ("personal_id", "military_id","ranks", "first_name",  "email", "is_staff")
+    list_display_links = ("personal_id", "military_id",)
+    search_fields = UserAdmin.search_fields + ( "personal_id", "military_id","ranks")

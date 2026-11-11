@@ -39,20 +39,20 @@ def submit_booking_request(request_id):
         BookingRequestItem.objects
         .select_for_update()
         .filter(booking_request=booking_request)
-        .order_by("employee_code")
+        .order_by("personal_id")
     )
 
     if not items:
         raise ValidationError("กรุณาเพิ่มรายชื่อพนักงานก่อนส่งคำขอ")
 
-    employee_codes = []
+    personal_ids = []
     for item in items:
-        code = item.employee_code.strip()
+        code = item.personal_id.strip()
         if not code:
             raise ValidationError("พบรายการที่ไม่ได้ระบุรหัสพนักงาน")
-        employee_codes.append(code)
+        personal_ids.append(code)
 
-    if len(employee_codes) != len(set(employee_codes)):
+    if len(personal_ids) != len(set(personal_ids)):
         raise ValidationError("พบรหัสพนักงานซ้ำภายในคำขอเดียวกัน")
 
     start_date = booking_request.booking_date
@@ -64,11 +64,11 @@ def submit_booking_request(request_id):
     delta = end_date - start_date
     booking_dates = [start_date + timedelta(days=i) for i in range(delta.days + 1)]
 
-    for item, code in zip(items, employee_codes):
+    for item, code in zip(items, personal_ids):
         for b_date in booking_dates:
             reservation, created = (
                 EmployeeBookingReservation.objects.get_or_create(
-                    employee_code=code,
+                    personal_id=code,
                     booking_date=b_date,
                     defaults={"booking_request_item": item},
                 )
@@ -79,7 +79,7 @@ def submit_booking_request(request_id):
                     f"พนักงาน {code} ถูกจองแล้วในวันที่ {b_date}"
                 )
 
-        item.employee_code = code
+        item.personal_id = code
         
         # หากเป็นการจองภายในแผนก ให้อนุมัติอัตโนมัติทันที
         if is_internal_booking:
@@ -95,7 +95,7 @@ def submit_booking_request(request_id):
 
         item.save(
             update_fields=[
-                "employee_code",
+                "personal_id",
                 "status",
                 "reviewed_by",
                 "reviewed_at",

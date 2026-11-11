@@ -42,7 +42,7 @@ class UserOutSchema(ModelSchema):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'employee_code', 'first_name', 'position']
+        fields = ['id', 'username', 'personal_id', 'first_name', 'position']
 
     @staticmethod
     def resolve_full_name(obj):
@@ -58,7 +58,7 @@ class CurrentUserSchema(ModelSchema):
         fields = [
             'id',
             'username',
-            'employee_code',
+            'personal_id',
             'first_name',
             'email',
             'position',
@@ -84,7 +84,7 @@ class EmployeeOutSchema(ModelSchema):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'employee_code', 'first_name', 'email', 'position']
+        fields = ['id', 'username', 'personal_id', 'first_name', 'email', 'position']
 
     @staticmethod
     def resolve_full_name(obj):
@@ -102,7 +102,7 @@ class EmployeeOutSchema(ModelSchema):
 class BookingItemSchema(ModelSchema):
     class Meta:
         model = BookingRequestItem
-        fields = ['id', 'employee_code', 'employee_name_snapshot', 'status', 'review_note']
+        fields = ['id', 'personal_id', 'employee_name_snapshot', 'status', 'review_note']
 
 
 class BookingRequestSchema(ModelSchema):
@@ -140,7 +140,7 @@ class ErrorSchema(Schema):
 
 
 class CreateItemIn(Schema):
-    employee_code: str
+    personal_id: str
     employee_name_snapshot: str
 
 
@@ -186,12 +186,12 @@ def list_employees(request, division_id: Optional[int] = None):
 
     qs = (
         User.objects.filter(is_active=True)
-        .exclude(employee_code__isnull=True)
-        .exclude(employee_code="")
+        .exclude(personal_id__isnull=True)
+        .exclude(personal_id="")
         .prefetch_related(
             Prefetch("division_role_assignments", queryset=active_assignments)
         )
-        .order_by("employee_code")
+        .order_by("personal_id")
     )
 
     if division_id is not None:
@@ -283,7 +283,7 @@ def create_booking(request, payload: CreateBookingIn):
         for item in payload.items:
             BookingRequestItem.objects.create(
                 booking_request=booking,
-                employee_code=item.employee_code,
+                personal_id=item.personal_id,
                 employee_name_snapshot=item.employee_name_snapshot,
                 status=BookingRequestItem.Status.DRAFT
             )

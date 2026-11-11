@@ -127,7 +127,7 @@ class BookingRequestItem(models.Model):
         verbose_name="คำขอ",
     )
 
-    employee_code = models.CharField(
+    personal_id = models.CharField(
         max_length=30,
         db_index=True,
         verbose_name="รหัสพนักงาน",
@@ -171,21 +171,21 @@ class BookingRequestItem(models.Model):
     )
 
     class Meta:
-        ordering = ["employee_code"]
+        ordering = ["personal_id"]
         verbose_name = "รายชื่อในคำขอ"
         verbose_name_plural = "รายชื่อในคำขอ"
         constraints = [
             models.UniqueConstraint(
                 fields=[
                     "booking_request",
-                    "employee_code",
+                    "personal_id",
                 ],
                 name="uniq_employee_per_booking_request",
             ),
         ]
 
     def __str__(self):
-        return f"{self.employee_code} - {self.employee_name_snapshot}"
+        return f"{self.personal_id} - {self.employee_name_snapshot}"
 
 
 class EmployeeBookingReservation(models.Model):
@@ -197,7 +197,7 @@ class EmployeeBookingReservation(models.Model):
         verbose_name="รายการจอง",
     )   
 
-    employee_code = models.CharField(
+    personal_id = models.CharField(
         max_length=30,
         verbose_name="รหัสพนักงาน",
     )
@@ -212,13 +212,13 @@ class EmployeeBookingReservation(models.Model):
     )
 
     class Meta:
-        ordering = ["booking_date", "employee_code"]
+        ordering = ["booking_date", "personal_id"]
         verbose_name = "รายการกันสิทธิ์การจอง"
         verbose_name_plural = "รายการกันสิทธิ์การจอง"
         constraints = [
             models.UniqueConstraint(
                 fields=[
-                    "employee_code",
+                    "personal_id",
                     "booking_date",
                 ],
                 name="uniq_employee_booking_date",
@@ -226,4 +226,4 @@ class EmployeeBookingReservation(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.employee_code} - {self.booking_date}"
+        return f"{self.personal_id} - {self.booking_date}"

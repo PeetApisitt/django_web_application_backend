@@ -51,7 +51,7 @@ class DailyBookingTests(TestCase):
 
         self.booking_date = timezone.localdate() + timedelta(days=1)
 
-    def create_request(self, requesting_division, employee_code, booking_date=None, requested_by=None, source_division=None):
+    def create_request(self, requesting_division, personal_id, booking_date=None, requested_by=None, source_division=None):
         request = BookingRequest.objects.create(
             requesting_division=requesting_division,
             source_division=source_division or self.division_b,
@@ -61,12 +61,12 @@ class DailyBookingTests(TestCase):
         )
         BookingRequestItem.objects.create(
             booking_request=request,
-            employee_code=employee_code,
+            personal_id=personal_id,
             employee_name_snapshot="Test Employee",
         )
         return request
 
-    def create_multi_item_request(self, requesting_division, employee_codes):
+    def create_multi_item_request(self, requesting_division, personal_ids):
         request = BookingRequest.objects.create(
             requesting_division=requesting_division,
             source_division=self.division_b,
@@ -74,10 +74,10 @@ class DailyBookingTests(TestCase):
             purpose="งานสำคัญประจำแผนก",
             booking_date=self.booking_date,
         )
-        for code in employee_codes:
+        for code in personal_ids:
             BookingRequestItem.objects.create(
                 booking_request=request,
-                employee_code=code,
+                personal_id=code,
                 employee_name_snapshot=f"Employee {code}",
             )
         return request
@@ -120,7 +120,7 @@ class DailyBookingTests(TestCase):
         # แผนกผู้ขอ และ แผนกต้นสังกัด คือ division_b เหมือนกัน
         request = self.create_request(
             requesting_division=self.division_b, 
-            employee_code="INT001",
+            personal_id="INT001",
             requested_by=self.admin_b,
             source_division=self.division_b
         )
@@ -136,7 +136,7 @@ class DailyBookingTests(TestCase):
         # Reservation ต้องถูกสร้างไว้กันสิทธิ์
         self.assertTrue(
             EmployeeBookingReservation.objects.filter(
-                employee_code="INT001", booking_date=self.booking_date
+                personal_id="INT001", booking_date=self.booking_date
             ).exists()
         )
 
@@ -159,8 +159,8 @@ class DailyBookingTests(TestCase):
     def test_evaluate_status_all_rejected(self):
         request = self.create_multi_item_request(self.division_a, ["EMP20", "EMP21"])
         submit_booking_request(request.pk)
-        item1 = request.items.get(employee_code="EMP20")
-        item2 = request.items.get(employee_code="EMP21")
+        item1 = request.items.get(personal_id="EMP20")
+        item2 = request.items.get(personal_id="EMP21")
         review_booking_item(item1.pk, self.admin_b, "REJECT", "note")
         review_booking_item(item2.pk, self.admin_b, "REJECT", "note")
         request.refresh_from_db()
@@ -169,8 +169,8 @@ class DailyBookingTests(TestCase):
     def test_evaluate_status_mixed_accepted_and_rejected(self):
         request = self.create_multi_item_request(self.division_a, ["EMP40", "EMP41"])
         submit_booking_request(request.pk)
-        item1 = request.items.get(employee_code="EMP40")
-        item2 = request.items.get(employee_code="EMP41")
+        item1 = request.items.get(personal_id="EMP40")
+        item2 = request.items.get(personal_id="EMP41")
         
         review_booking_item(item1.pk, self.admin_b, "ACCEPT")
         review_booking_item(item2.pk, self.admin_b, "REJECT", "note")
@@ -188,7 +188,7 @@ class DailyBookingTests(TestCase):
         cancelled_req = cancel_booking_request(request.pk, self.user)
         self.assertEqual(cancelled_req.status, BookingRequest.Status.CANCELLED)
         res_count = EmployeeBookingReservation.objects.filter(
-            employee_code__in=["CAN01", "CAN02"], 
+            personal_id__in=["CAN01", "CAN02"], 
             booking_date=self.booking_date
         ).count()
         self.assertEqual(res_count, 0)
@@ -259,7 +259,7 @@ class DailyBookingTests(TestCase):
         )
         item = BookingRequestItem.objects.create(
             booking_request=request,
-            employee_code="MULTI001",
+            personal_id="MULTI001",
             employee_name_snapshot="Multi-day Employee",
         )
 
@@ -268,7 +268,7 @@ class DailyBookingTests(TestCase):
 
         reservations = EmployeeBookingReservation.objects.filter(
             booking_request_item=item,
-            employee_code="MULTI001",
+            personal_id="MULTI001",
         ).order_by("booking_date")
 
         # ตรวจสอบว่าถูกสร้างขึ้นมา 3 แถว (3 records)
@@ -301,7 +301,7 @@ class DailyBookingTests(TestCase):
         )
         item = BookingRequestItem.objects.create(
             booking_request=request,
-            employee_code="MULTI001",
+            personal_id="MULTI001",
             employee_name_snapshot="Multi-day Employee",
         )
 
@@ -310,7 +310,7 @@ class DailyBookingTests(TestCase):
 
         reservations = EmployeeBookingReservation.objects.filter(
             booking_request_item=item,
-            employee_code="MULTI001",
+            personal_id="MULTI001",
         ).order_by("booking_date")
 
         # ตรวจสอบว่าถูกสร้างขึ้นมา 3 แถว (3 records)

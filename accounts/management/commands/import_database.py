@@ -64,26 +64,32 @@ class Command(BaseCommand):
             has_position_field = hasattr(User, "position")
 
             for _, row in df.iterrows():
-                emp_code = str(row.get("employee_code", "")).strip()
+                personal_id = str(row.get("personal_id", "")).strip()
                 full_name = str(row.get("full_name", "")).strip()
                 div_code = str(row.get("division_code", "")).strip()
                 pos = str(row.get("position", "")).strip()
+                ranks = str(row.get("ranks", "")).strip()
+                military_id = str(row.get("military_id", "")).strip()
                 raw_email = row.get("email", "") or row.get("e-mail", "")
                 email = str(raw_email).strip()
 
                 # ข้ามแถวที่ไม่มีรหัสพนักงาน
-                if not emp_code or emp_code.lower() == "nan":
+                if not personal_id or personal_id.lower() == "nan":
                     continue
 
                 # ป้องกันกรณีค่ากลายเป็นคำว่า "nan" และต่อท้ายโดเมน @rtarf.mi.th สำหรับ email ที่มีค่า
                 full_name = "" if full_name.lower() == "nan" else full_name
                 user_email = "" if (not email or email.lower() == "nan") else f"{email}@rtarf.mi.th"
                 user_position = "" if pos.lower() == "nan" else pos
+                user_ranks = "" if ranks.lower() == "nan" else ranks
+                user_military_id = "" if military_id.lower() == "nan" else military_id
 
                 user_defaults = {
-                    "username": emp_code,
+                    "username": personal_id,
                     "first_name": full_name,
                     "email": user_email,
+                    "ranks": user_ranks,
+                    "military_id": user_military_id,
                     "is_active": True,
                 }
 
@@ -93,7 +99,7 @@ class Command(BaseCommand):
 
                 # ขั้นที่ 2: บันทึกหรืออัปเดตข้อมูลผู้ใช้งาน (User)
                 user, _ = User.objects.update_or_create(
-                    employee_code=emp_code,
+                    personal_id=personal_id,
                     defaults=user_defaults,
                 )
 

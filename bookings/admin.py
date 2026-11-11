@@ -14,7 +14,7 @@ class BookingRequestItemInline(admin.TabularInline):
     extra = 1
 
     fields = (
-        "employee_code",
+        "personal_id",
         "employee_name_snapshot",
         "status",
         "reviewed_by",
@@ -116,7 +116,7 @@ class BookingRequestItemAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "booking_request",
-        "employee_code",
+        "personal_id",
         "employee_name_snapshot",
         "status",
         "reviewed_by",
@@ -128,7 +128,7 @@ class BookingRequestItemAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "employee_code",
+        "personal_id",
         "employee_name_snapshot",
         "booking_request__purpose",
     )
@@ -147,7 +147,7 @@ class BookingRequestItemAdmin(admin.ModelAdmin):
 class EmployeeBookingReservationAdmin(admin.ModelAdmin):
 
     list_display = (
-        "employee_code",
+        "personal_id",
         "booking_date",
         "booking_request_item",
         "created_at",
@@ -158,13 +158,13 @@ class EmployeeBookingReservationAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "employee_code",
+        "personal_id",
         "booking_request_item__employee_name_snapshot",
     )
 
     readonly_fields = (
         "booking_request_item",
-        "employee_code",
+        "personal_id",
         "booking_date",
         "created_at",
     )
